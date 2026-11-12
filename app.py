@@ -9,8 +9,11 @@ st.set_page_config(page_title="Morelate - Check de Entrega", layout="centered")
 st.title("🚛 Confirmação de Entrega - Morelate")
 st.write("Preencha os dados abaixo para registrar o status da entrega.")
 
+# Link direto da sua Planilha Google
+LINK_PLANILHA = "https://google.com"
+
 conn = st.connection("gsheets", type=GSheetsConnection)
-df_existente = conn.read(ttl=0)
+df_existente = conn.read(spreadsheet=LINK_PLANILHA, ttl=0)
 
 numero_nf = st.text_input("📋 Número da Nota Fiscal:", placeholder="Ex: 105432")
 motorista = st.selectbox("👤 Entregador:", ["Selecione...", "Carlos Silva", "Marcos Souza", "Roberto Lima"])
@@ -67,7 +70,7 @@ if st.button("🚀 Confirmar Registro", use_container_width=True):
             }])
 
             df_final = pd.concat([df_existente, df_novo], ignore_index=True)
-            conn.update(data=df_final)
+            conn.update(spreadsheet=LINK_PLANILHA, data=df_final)
             st.balloons()
             st.success(f"✅ Nota Fiscal {nf_limpa} salva na nuvem com sucesso às {agora}!")
 
