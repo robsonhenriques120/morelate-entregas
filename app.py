@@ -9,7 +9,7 @@ st.set_page_config(page_title="Morelate - Check de Entrega", layout="centered")
 st.title("🚛 Confirmação de Entrega - Morelate")
 st.write("Preencha os dados abaixo para registrar o status da entrega.")
 
-URL_APPS_SCRIPT = "https://google.com"
+URL_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbxX9-wief5QWVZXADivEX8qVKkvraYaHES14qoyDE6Ey0REGX4IQR62l_tcnVSz0TTqwA/exec"
 URL_LEITURA_CSV = "https://google.com"
 
 numero_nf = st.text_input("📋 Número da Nota Fiscal:", placeholder="Ex: 105432")
@@ -57,11 +57,15 @@ if st.button("🚀 Confirmar Registro", use_container_width=True):
             
             try:
                 resposta = requests.get(URL_APPS_SCRIPT, params=parametros, timeout=15)
-                if resposta.status_code == 200:
+                resultado = resposta.json()
+                
+                if resultado.get("status") == "duplicado":
+                    st.warning(f"⚠️ Atenção: A Nota Fiscal {nf_limpa} já foi registrada anteriormente!")
+                elif resultado.get("status") == "sucesso":
                     st.balloons()
-                    st.success(f"✅ Nota Fiscal {nf_limpa} enviada com sucesso às {agora}!")
+                    st.success(f"✅ Nota Fiscal {nf_limpa} salva na planilha com sucesso às {agora}!")
                 else:
-                    st.error(f"❌ O Google retornou código {resposta.status_code}. Verifique se 'Quem pode acessar' está como 'Qualquer pessoa'.")
+                    st.error("❌ Não foi possível confirmar a gravação. Tente novamente.")
             except Exception as e:
                 st.error(f"❌ Falha de conexão ao enviar os dados: {e}")
 
