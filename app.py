@@ -46,7 +46,7 @@ if st.button("🚀 Confirmar Registro", use_container_width=True):
             fuso_br = ZoneInfo("America/Sao_Paulo")
             agora = datetime.now(fuso_br).strftime("%d/%m/%Y %H:%M:%S")
             
-            payload = {
+            parametros = {
                 "Data_Hora": agora,
                 "Nota_Fiscal": nf_limpa,
                 "Motorista": motorista,
@@ -56,7 +56,7 @@ if st.button("🚀 Confirmar Registro", use_container_width=True):
             }
             
             try:
-                resposta = requests.post(URL_APPS_SCRIPT, json=payload, timeout=15)
+                resposta = requests.get(URL_APPS_SCRIPT, params=parametros, timeout=15)
                 resultado = resposta.json()
                 
                 if resultado.get("status") == "duplicado":
@@ -79,4 +79,4 @@ if senha == "morelate2026":
         df_existente = pd.read_csv(URL_LEITURA_CSV)
         st.dataframe(df_existente.tail(10), use_container_width=True)
     except Exception:
-        st.info("Aguardando os primeiros registros ou planilha configurada como pública para leitura.")
+        st.info("Aguardando os primeiros registros.")
