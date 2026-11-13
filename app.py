@@ -57,15 +57,11 @@ if st.button("🚀 Confirmar Registro", use_container_width=True):
             
             try:
                 resposta = requests.get(URL_APPS_SCRIPT, params=parametros, timeout=15)
-                resultado = resposta.json()
-                
-                if resultado.get("status") == "duplicado":
-                    st.warning(f"⚠️ Atenção: A Nota Fiscal {nf_limpa} já foi registrada anteriormente!")
-                elif resultado.get("status") == "sucesso":
+                if resposta.status_code == 200:
                     st.balloons()
-                    st.success(f"✅ Nota Fiscal {nf_limpa} salva na nuvem com sucesso às {agora}!")
+                    st.success(f"✅ Nota Fiscal {nf_limpa} enviada com sucesso às {agora}!")
                 else:
-                    st.error("❌ Erro inesperado ao salvar. Tente novamente.")
+                    st.error(f"❌ O Google retornou código {resposta.status_code}. Verifique se 'Quem pode acessar' está como 'Qualquer pessoa'.")
             except Exception as e:
                 st.error(f"❌ Falha de conexão ao enviar os dados: {e}")
 
