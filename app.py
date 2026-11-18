@@ -1,5 +1,4 @@
 
-
 import streamlit as st
 from streamlit_gsheets import GSheetsConnection
 import pandas as pd
@@ -13,10 +12,8 @@ st.set_page_config(
     layout="centered"
 )
 
-# Estilo visual personalizado (Identidade Morelate + Mobile-First)
 st.markdown("""
     <style>
-    /* Cartão do cabeçalho */
     .header-card {
         background-color: #0B6E31;
         padding: 18px 15px 14px 15px;
@@ -39,7 +36,6 @@ st.markdown("""
         margin-top: 2px;
         margin-bottom: 4px;
     }
-    /* Botão principal no verde Morelate */
     div.stButton > button:first-child {
         background-color: #0B6E31;
         color: white;
@@ -54,7 +50,6 @@ st.markdown("""
         background-color: #085224;
         color: white;
     }
-    /* Aumenta o toque dos botões de rádio no celular */
     div[role="radiogroup"] label {
         font-size: 17px !important;
         padding: 6px 0px;
@@ -62,13 +57,11 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Logo centralizado no topo
 if os.path.exists("logo.png"):
-    col1, col2, col3 = st.columns([1, 2, 1])
+    col1, col2, col3 = st.columns()
     with col2:
         st.image("logo.png", use_container_width=True)
 
-# Cabeçalho Oficial estilo Cartão
 st.markdown("""
     <div class="header-card">
         <p class="header-title">Controle de Entregas</p>
@@ -76,7 +69,6 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-# Link direto da sua Planilha Google
 LINK_PLANILHA = "https://google.com"
 
 conn = st.connection("gsheets", type=GSheetsConnection)
