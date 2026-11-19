@@ -11,8 +11,10 @@ st.set_page_config(
     layout="centered"
 )
 
+# Estilo visual personalizado (Identidade Morelate + Mobile-First)
 st.markdown("""
     <style>
+    /* Cartão do cabeçalho */
     .header-card {
         background-color: #0B6E31;
         padding: 18px 15px 14px 15px;
@@ -35,6 +37,7 @@ st.markdown("""
         margin-top: 2px;
         margin-bottom: 4px;
     }
+    /* Botão principal no verde Morelate */
     div.stButton > button:first-child {
         background-color: #0B6E31;
         color: white;
@@ -49,6 +52,7 @@ st.markdown("""
         background-color: #085224;
         color: white;
     }
+    /* Aumenta o toque dos botões de rádio no celular */
     div[role="radiogroup"] label {
         font-size: 17px !important;
         padding: 6px 0px;
@@ -56,11 +60,13 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+# Logo centralizado no topo
 if os.path.exists("logo.png"):
-    col1, col2, col3 = st.columns(3)
+    col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
         st.image("logo.png", use_container_width=True)
 
+# Cabeçalho Oficial estilo Cartão
 st.markdown("""
     <div class="header-card">
         <p class="header-title">Controle de Entregas</p>
@@ -68,19 +74,48 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-LINK_PLANILHA = "".join([
-    "https://",
-    "docs.google.com",
-    "/spreadsheets/d/",
-    "1I3V8UxkeQyP1tO7TZIVbQk7HQrxv-FSsz5l3ChCMsV4",
-    "/edit?gid=0#gid=0"
-])
+# Link direto da sua Planilha Google (MANTENHA O SEU LINK REAL AQUI)
+LINK_PLANILHA = "https://docs.google.com/spreadsheets/d/1I3V8UxkeQyP1tO7TZIVbQk7HQrxv-FSsz5l3ChCMsV4/edit?gid=0#gid=0"
 
 conn = st.connection("gsheets", type=GSheetsConnection)
 df_existente = conn.read(spreadsheet=LINK_PLANILHA, ttl=0)
 
 numero_nf = st.text_input("📋 Número da Nota Fiscal:", placeholder="Digite apenas números (Ex: 105432)")
-motorista = st.selectbox("👤 Entregador:", ["Selecione...", "Carlos Silva", "Marcos Souza", "Roberto Lima"])
+
+# --- APENAS ESTE TRECHO FOI ADICIONADO ---
+tipo_motorista = st.radio(
+    "🚛 Tipo de Motorista:",
+    ["Motorista Morelate", "Motorista Agregado"],
+    horizontal=True
+)
+
+if tipo_motorista == "Motorista Morelate":
+    motorista = st.selectbox(
+        "👤 Entregador Morelate:",
+        [
+            "Selecione...",
+            "Carlos Silva",
+            "Marcos Souza",
+            "Roberto Lima",
+            "Motorista 4",
+            "Motorista 5",
+            "Motorista 6",
+            "Motorista 7"
+        ]
+    )
+else:
+    motorista = st.selectbox(
+        "🚘 Placa / Motorista Agregado:",
+        [
+            "Selecione...",
+            "ABC1D23 - João Pereira",
+            "XYZ9A88 - João Pereira",
+            "KLM4B12 - Pedro Santos"
+            # Adicione aqui as 20 placas/nomes separados por vírgula
+        ]
+    )
+# -----------------------------------------
+
 status = st.radio("📌 Status da Entrega:", ["🟢 Pedido Entregue OK", "🔴 Cancelado / Recusado"])
 
 motivo_selecionado = "N/A"
