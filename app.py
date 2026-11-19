@@ -74,15 +74,14 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-# Link direto da sua Planilha Google (MANTENHA O SEU LINK REAL AQUI)
-LINK_PLANILHA = "https://docs.google.com/spreadsheets/d/1I3V8UxkeQyP1tO7TZIVbQk7HQrxv-FSsz5l3ChCMsV4/edit?gid=0#gid=0"
+# Link direto da Planilha Google Morelate
+LINK_PLANILHA = "https://google.com"
 
 conn = st.connection("gsheets", type=GSheetsConnection)
 df_existente = conn.read(spreadsheet=LINK_PLANILHA, ttl=0)
 
 numero_nf = st.text_input("📋 Número da Nota Fiscal:", placeholder="Digite apenas números (Ex: 105432)")
 
-# --- APENAS ESTE TRECHO FOI ADICIONADO ---
 tipo_motorista = st.radio(
     "🚛 Tipo de Motorista:",
     ["Motorista Morelate", "Motorista Agregado"],
@@ -94,13 +93,13 @@ if tipo_motorista == "Motorista Morelate":
         "👤 Entregador Morelate:",
         [
             "Selecione...",
-            "Carlos Silva",
-            "Marcos Souza",
-            "Roberto Lima",
-            "Motorista 4",
-            "Motorista 5",
-            "Motorista 6",
-            "Motorista 7"
+            "ALEXANDRE",
+            "EMERSON",
+            "EVALDO",
+            "NIVALDO",
+            "PAULO",
+            "RAMON",
+            "RICARDO"
         ]
     )
 else:
@@ -111,10 +110,8 @@ else:
             "ABC1D23 - João Pereira",
             "XYZ9A88 - João Pereira",
             "KLM4B12 - Pedro Santos"
-            # Adicione aqui as 20 placas/nomes separados por vírgula
         ]
     )
-# -----------------------------------------
 
 status = st.radio("📌 Status da Entrega:", ["🟢 Pedido Entregue OK", "🔴 Cancelado / Recusado"])
 
