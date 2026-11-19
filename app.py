@@ -75,7 +75,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Link direto da Planilha Google Morelate
-LINK_PLANILHA = "https://google.com"
+LINK_PLANILHA = "https://docs.google.com/spreadsheets/d/1I3V8UxkeQyP1tO7TZIVbQk7HQrxv-FSsz5l3ChCMsV4/edit?gid=0#gid=0"
 
 conn = st.connection("gsheets", type=GSheetsConnection)
 df_existente = conn.read(spreadsheet=LINK_PLANILHA, ttl=0)
