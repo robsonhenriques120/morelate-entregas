@@ -168,7 +168,7 @@ if st.button("✅ Confirmar Registro", use_container_width=True):
             
             df_final = pd.concat([df_existente, df_novo], ignore_index=True)
             conn.update(spreadsheet=LINK_PLANILHA, data=df_final)
-            st.balloons()
+            
             st.success(f"✅ Nota Fiscal {nf_limpa} registrada com sucesso às {agora}!")
 
 st.sidebar.header("🔒 Área da Logística")
