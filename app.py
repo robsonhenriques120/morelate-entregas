@@ -93,8 +93,7 @@ if tipo_motorista == "Motorista Morelate":
         "👤 Entregador Morelate:",
         [
             "Selecione...",
-            "ALEXANDRE",
-            "EMERSON",
+            "ALEXANDRE",            
             "EVALDO",
             "NIVALDO",
             "PAULO",
