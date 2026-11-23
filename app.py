@@ -125,7 +125,7 @@ if status == "🔴 Cancelado / Recusado":
             "Pedido Duplicado / Cliente não pediu",
             "Endereço errado / Local não encontrado",
             "Mercadoria errada / Faltando / Avariada",
-            "Atraso na entrega / Fora do horário"
+            "Atraso na entrega / Fora do horário",
             "Cliente ausente / Local fechado",
             "Cliente desistiu / Sem dinheiro ou espaço"
         ]
