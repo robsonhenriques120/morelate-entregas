@@ -121,12 +121,13 @@ if status == "🔴 Cancelado / Recusado":
         "⚠️ Motivo Real do Cancelamento:",
         [
             "Selecione...",
-            "Dados da Fatura / Boleto Incorretos",
-            "Emissão Indevida / Pedido Duplicado",
-            "Desistência da Compra",
-            "Avaria / Erro de Aplicação",
-            "Cliente Ausente / Loja Fechada",
-            "Recusa por Atraso"
+            "Erro na nota / Boleto / Preço divergente",
+            "Pedido Duplicado / Cliente não pediu",
+            "Endereço errado / Local não encontrado",
+            "Mercadoria errada / Faltando / Avariada",
+            "Atraso na entrega / Fora do horário"
+            "Cliente ausente / Local fechado",
+            "Cliente desistiu / Sem dinheiro ou espaço"
         ]
     )
 
