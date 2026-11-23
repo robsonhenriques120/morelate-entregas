@@ -106,9 +106,12 @@ else:
         "🚘 Placa / Motorista Agregado:",
         [
             "Selecione...",
-            "ABC1D23 - João Pereira",
-            "XYZ9A88 - João Pereira",
-            "KLM4B12 - Pedro Santos"
+            "QUT 1B82 - CREMILDA",
+            "QPQ 6C07 - FELIPE",
+            "DZZ 8077 - FELIPE",
+            "UQK 9G88 - GABRIEL",
+            "FYW 4D53 - GABRIEL",
+            "GFV 6F29 - JOALDO"
         ]
     )
 
