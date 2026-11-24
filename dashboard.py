@@ -1,3 +1,4 @@
+
 from datetime import datetime
 from zoneinfo import ZoneInfo
 import pandas as pd
@@ -103,7 +104,10 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-LINK_PLANILHA = "https://google.com"
+# Link completo da planilha montado de forma segura
+ID_PLANILHA = "1I3V8UxkeQyP1tO7TZIVbQk7HQrxv-FSsz5l3ChCMsV4"
+LINK_PLANILHA = f"https://google.com{ID_PLANILHA}/edit?gid=0#gid=0"
+
 conn = st.connection("gsheets", type=GSheetsConnection)
 
 
