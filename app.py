@@ -61,11 +61,11 @@ st.markdown("""
 # Conexão segura e em cache com o Google Sheets via gspread
 @st.cache_resource
 def conectar_planilha():
+    base_url = "https://www.googleapis.com" + "/auth/"
     escopos = [
-        "https://googleapis.com",
-        "https://googleapis.com"
+        base_url + "spreadsheets",
+        base_url + "drive"
     ]
-    # Lê as credenciais diretamente dos Secrets do Streamlit
     credenciais_dict = dict(st.secrets["connections"]["gsheets"])
     creds = Credentials.from_service_account_info(credenciais_dict, scopes=escopos)
     cliente = gspread.authorize(creds)
@@ -179,8 +179,8 @@ if st.button("✅ Confirmar Registro", use_container_width=True, disabled=st.ses
                     aba.append_row(nova_linha, value_input_option="USER_ENTERED")
                     st.success(f"✅ Nota Fiscal {nf_limpa} registrada com sucesso às {agora}!")
                     
-        except Exception as e:
-            st.error("❌ Falha de conexão ao salvar. Verifique sua internet e tente novamente.")
+        except Exception as erro:
+            st.error(f"❌ Detalhe do erro: {erro}")
         finally:
             st.session_state.enviando = False
 
@@ -202,5 +202,5 @@ if senha == senha_correta:
             st.dataframe(df_logistica.tail(10), use_container_width=True)
         else:
             st.info("Nenhum registro encontrado ainda.")
-    except Exception:
-        st.error("Não foi possível carregar os dados da planilha.")
+    except Exception as erro:
+        st.error(f"Não foi possível carregar os dados da planilha: {erro}")
