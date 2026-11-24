@@ -24,7 +24,14 @@ if not st.session_state.autenticado:
         st.info(
             "Acesso restrito à Gestão e Logística. Digite a senha para visualizar o painel ao vivo."
         )
-        senha_digitada = st.text_input("Senha de acesso:", type="password")
+        senha_digitada = st.text_input(
+            "Senha de acesso:",
+            value="",
+            type="password",
+            autocomplete="new-password",
+            key="campo_senha_gestor"
+        )
+        
         if st.button("Entrar no Painel", use_container_width=True):
             senha_correta = st.secrets.get("SENHA_GESTOR", "morelate2026")
             if senha_digitada == senha_correta:
