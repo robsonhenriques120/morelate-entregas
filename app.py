@@ -1,5 +1,6 @@
 import streamlit as st
-from streamlit_gsheets import GSheetsConnection
+import gspread
+from google.oauth2.service_account import Credentials
 import pandas as pd
 from datetime import datetime
 from zoneinfo import ZoneInfo
@@ -14,7 +15,6 @@ st.set_page_config(
 # Estilo visual personalizado (Identidade Morelate + Mobile-First)
 st.markdown("""
     <style>
-    /* Cartão do cabeçalho */
     .header-card {
         background-color: #0B6E31;
         padding: 18px 15px 14px 15px;
@@ -37,7 +37,6 @@ st.markdown("""
         margin-top: 2px;
         margin-bottom: 4px;
     }
-    /* Botão principal no verde Morelate */
     div.stButton > button:first-child {
         background-color: #0B6E31;
         color: white;
@@ -52,7 +51,6 @@ st.markdown("""
         background-color: #085224;
         color: white;
     }
-    /* Aumenta o toque dos botões de rádio no celular */
     div[role="radiogroup"] label {
         font-size: 17px !important;
         padding: 6px 0px;
@@ -60,13 +58,29 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Logo centralizado no topo
+# Conexão segura e em cache com o Google Sheets via gspread
+@st.cache_resource
+def conectar_planilha():
+    escopos = [
+        "https://googleapis.com",
+        "https://googleapis.com"
+    ]
+    # Lê as credenciais diretamente dos Secrets do Streamlit
+    credenciais_dict = dict(st.secrets["connections"]["gsheets"])
+    creds = Credentials.from_service_account_info(credenciais_dict, scopes=escopos)
+    cliente = gspread.authorize(creds)
+    
+    # Abre a planilha pelo ID exato da base_entregas_morelate
+    planilha = cliente.open_by_key("1I3V8UxkeQyP1tO7TZIVbQk7HQrxv-FSsz5l3ChCMsV4")
+    return planilha.sheet1
+
+# Logo centralizado
 if os.path.exists("logo.png"):
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
         st.image("logo.png", use_container_width=True)
 
-# Cabeçalho Oficial estilo Cartão
+# Cabeçalho
 st.markdown("""
     <div class="header-card">
         <p class="header-title">Controle de Entregas</p>
@@ -74,13 +88,11 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-# Link direto da Planilha Google Morelate
-LINK_PLANILHA = "https://docs.google.com/spreadsheets/d/1I3V8UxkeQyP1tO7TZIVbQk7HQrxv-FSsz5l3ChCMsV4/edit?gid=0#gid=0"
+# Controle de estado para evitar duplo clique no celular
+if "enviando" not in st.session_state:
+    st.session_state.enviando = False
 
-# Conecta com o Google Sheets (sem ler os dados ainda, para o celular abrir rápido)
-conn = st.connection("gsheets", type=GSheetsConnection)
-
-# Campos do formulário do motorista
+# Formulário
 numero_nf = st.text_input("📋 Número da Nota Fiscal:", placeholder="Digite apenas números (Ex: 105432)")
 
 tipo_motorista = st.radio(
@@ -92,15 +104,7 @@ tipo_motorista = st.radio(
 if tipo_motorista == "Motorista Morelate":
     motorista = st.selectbox(
         "👤 Entregador Morelate:",
-        [
-            "Selecione...",
-            "ALEXANDRE",            
-            "EVALDO",
-            "NIVALDO",
-            "PAULO",
-            "RAMON",
-            "RICARDO"
-        ]
+        ["Selecione...", "ALEXANDRE", "EVALDO", "NIVALDO", "PAULO", "RAMON", "RICARDO"]
     )
 else:
     motorista = st.selectbox(
@@ -119,7 +123,6 @@ else:
 status = st.radio("📌 Status da Entrega:", ["🟢 Pedido Entregue OK", "🔴 Cancelado / Recusado"])
 
 motivo_selecionado = "N/A"
-
 if status == "🔴 Cancelado / Recusado":
     motivo_selecionado = st.selectbox(
         "⚠️ Motivo Real do Cancelamento:",
@@ -138,61 +141,66 @@ if status == "🔴 Cancelado / Recusado":
 observacao = st.text_area("📝 Observações (opcional):", placeholder="Descreva brevemente o ocorrido, se necessário...")
 
 st.write("")
-if st.button("✅ Confirmar Registro", use_container_width=True):
+
+# Botão com trava de clique duplo
+if st.button("✅ Confirmar Registro", use_container_width=True, disabled=st.session_state.enviando):
     nf_limpa = numero_nf.strip()
     
-    # 1. Valida se o número da NF contém apenas dígitos
     if not nf_limpa or not nf_limpa.isdigit():
         st.error("❌ Digite apenas números válidos para a Nota Fiscal.")
-        
-    # 2. Valida se o motorista e o motivo (se recusado) foram selecionados
     elif motorista == "Selecione..." or (status == "🔴 Cancelado / Recusado" and motivo_selecionado == "Selecione..."):
         st.error("❌ Preencha o Entregador e o Motivo do cancelamento.")
-        
     else:
-        # 3. Lê a planilha exatamente agora para evitar sobrescrever dados de outro motorista
-        df_atualizado = conn.read(spreadsheet=LINK_PLANILHA, ttl=0)
-        
-        # 4. Verifica notas já registradas (com proteção caso a planilha esteja vazia)
-        if not df_atualizado.empty and "Nota_Fiscal" in df_atualizado.columns:
-            notas_registradas = (
-                df_atualizado["Nota_Fiscal"]
-                .dropna()
-                .astype(str)
-                .str.replace(r"\.0$", "", regex=True)
-                .str.strip()
-                .values
-            )
-        else:
-            notas_registradas = []
-        
-        # 5. Impede duplicidade ou salva o novo registro
-        if nf_limpa in notas_registradas:
-            st.warning(f"⚠️ Atenção: A Nota Fiscal {nf_limpa} já foi registrada anteriormente!")
-        else:
-            fuso_br = ZoneInfo("America/Sao_Paulo")
-            agora = datetime.now(fuso_br).strftime("%d/%m/%Y %H:%M:%S")
-            
-            df_novo = pd.DataFrame([{
-                "Data_Hora": agora,
-                "Nota_Fiscal": nf_limpa,
-                "Motorista": motorista,
-                "Status": status,
-                "Motivo_Real": motivo_selecionado,
-                "Observações": observacao.strip()
-            }])
-            
-            df_final = pd.concat([df_atualizado, df_novo], ignore_index=True)
-            conn.update(spreadsheet=LINK_PLANILHA, data=df_final)
-            
-            st.success(f"✅ Nota Fiscal {nf_limpa} registrada com sucesso às {agora}!")
+        st.session_state.enviando = True
+        try:
+            with st.spinner("Registrando entrega com segurança..."):
+                aba = conectar_planilha()
+                
+                # Lê APENAS a coluna B (Nota_Fiscal) para checar duplicidade de forma ultra-rápida
+                notas_coluna = aba.col_values(2)[1:] # Ignora o cabeçalho
+                notas_limpas = [str(n).replace(".0", "").strip() for n in notas_coluna]
+                
+                if nf_limpa in notas_limpas:
+                    st.warning(f"⚠️ Atenção: A Nota Fiscal {nf_limpa} já foi registrada anteriormente!")
+                else:
+                    fuso_br = ZoneInfo("America/Sao_Paulo")
+                    agora = datetime.now(fuso_br).strftime("%d/%m/%Y %H:%M:%S")
+                    
+                    nova_linha = [
+                        agora,
+                        nf_limpa,
+                        motorista,
+                        status,
+                        motivo_selecionado,
+                        observacao.strip()
+                    ]
+                    
+                    # Insere a linha no final sem tocar nas outras linhas (100% seguro contra concorrência)
+                    aba.append_row(nova_linha, value_input_option="USER_ENTERED")
+                    st.success(f"✅ Nota Fiscal {nf_limpa} registrada com sucesso às {agora}!")
+                    
+        except Exception as e:
+            st.error("❌ Falha de conexão ao salvar. Verifique sua internet e tente novamente.")
+        finally:
+            st.session_state.enviando = False
 
 # Área restrita na barra lateral
 st.sidebar.header("🔒 Área da Logística")
 senha = st.sidebar.text_input("Senha de acesso:", type="password")
 
-if senha == "morelate2026":
+# Busca a senha dos Secrets (ou usa fallback caso ainda não tenha configurado lá)
+senha_correta = st.secrets.get("SENHA_LOGISTICA", "morelate2026")
+
+if senha == senha_correta:
     st.divider()
     st.subheader("📊 Últimos Registros na Planilha Google")
-    df_logistica = conn.read(spreadsheet=LINK_PLANILHA, ttl=0)
-    st.dataframe(df_logistica.tail(10), use_container_width=True)
+    try:
+        aba = conectar_planilha()
+        dados = aba.get_all_records()
+        if dados:
+            df_logistica = pd.DataFrame(dados)
+            st.dataframe(df_logistica.tail(10), use_container_width=True)
+        else:
+            st.info("Nenhum registro encontrado ainda.")
+    except Exception:
+        st.error("Não foi possível carregar os dados da planilha.")
