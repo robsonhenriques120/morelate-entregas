@@ -1,5 +1,3 @@
-# dashboard
-
 from datetime import datetime
 from zoneinfo import ZoneInfo
 import pandas as pd
@@ -16,7 +14,7 @@ if "autenticado" not in st.session_state:
     st.session_state.autenticado = False
 
 if not st.session_state.autenticado:
-    col1, col2, col3 = st.columns([1, 1.3, 1])
+    col1, col2, col3 = st.columns([1, 1.5, 1])
     with col2:
         st.markdown(
             "<h3 style='text-align: center; color: #0B6E31;'>🔒 Torre de Controle Morelate</h3>",
@@ -35,7 +33,7 @@ if not st.session_state.autenticado:
                 st.error("❌ Senha incorreta.")
     st.stop()
 
-# --- ESTILO VISUAL EXECUTIVO COMPACTO ---
+# --- ESTILO VISUAL EXECUTIVO BLINDADO (CONTRASTE PERFEITO) ---
 st.markdown(
     """
     <style>
@@ -45,29 +43,32 @@ st.markdown(
         padding-bottom: 1.2rem !important;
         max-width: 96%;
     }
-    /* Banner superior mais fino e elegante */
+    /* Banner superior verde Morelate */
     .top-banner {
         background-color: #0B6E31;
         padding: 12px 20px;
         border-radius: 10px;
-        color: white;
+        color: #FFFFFF !important;
         display: flex;
         justify-content: space-between;
         align-items: center;
         margin-bottom: 14px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.08);
     }
     .top-banner h2 {
         font-size: 1.35rem !important;
+        color: #FFFFFF !important;
         margin: 0 !important;
         padding: 0 !important;
     }
     .top-banner p {
         font-size: 0.85rem !important;
         margin: 2px 0 0 0 !important;
-        color: #D9F2E2;
+        color: #D9F2E2 !important;
     }
     .badge-ao-vivo {
-        background: #085224;
+        background-color: #085224;
+        color: #FFFFFF !important;
         padding: 6px 12px;
         border-radius: 6px;
         font-size: 0.82rem;
@@ -78,18 +79,23 @@ st.markdown(
         font-size: 1.1rem !important;
         margin-bottom: 0.5rem !important;
     }
-    /* Cartões de KPIs mais compactos e proporcionais */
+    /* Cartões de KPIs com fundo e texto travados para nunca embaralhar */
     [data-testid="stMetric"] {
-        background-color: #F8FAF9;
-        border: 1px solid #E2E8F0;
-        padding: 10px 14px;
-        border-radius: 8px;
+        background-color: #FFFFFF !important;
+        border: 1px solid #D1D5DB !important;
+        border-left: 5px solid #0B6E31 !important;
+        padding: 10px 14px !important;
+        border-radius: 8px !important;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
     }
-    [data-testid="stMetricLabel"] {
+    [data-testid="stMetricLabel"] p {
         font-size: 0.85rem !important;
+        color: #4B5563 !important;
+        font-weight: 600 !important;
     }
-    [data-testid="stMetricValue"] {
+    [data-testid="stMetricValue"] div {
         font-size: 1.65rem !important;
+        color: #111827 !important;
         font-weight: 700 !important;
     }
     </style>
@@ -97,7 +103,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-LINK_PLANILHA = "https://docs.google.com/spreadsheets/d/1I3V8UxkeQyP1tO7TZIVbQk7HQrxv-FSsz5l3ChCMsV4/edit?gid=0#gid=0"
+LINK_PLANILHA = "https://google.com"
 conn = st.connection("gsheets", type=GSheetsConnection)
 
 
@@ -145,7 +151,7 @@ def painel_ao_vivo():
 
     # Filtro rápido de data
     hoje_str = datetime.now(fuso_br).strftime("%d/%m/%Y")
-    col_filtro1, col_filtro2 = st.columns([1.2, 3])
+    col_filtro1, col_filtro2 = st.columns([1, 3])
     with col_filtro1:
         apenas_hoje = st.toggle("📅 Filtrar apenas entregas de HOJE", value=False)
 
