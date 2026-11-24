@@ -35,7 +35,7 @@ if not st.session_state.autenticado:
                 st.error("❌ Senha incorreta.")
     st.stop()
 
-# --- ESTILO VISUAL EXECUTIVO BLINDADO ---
+# --- ESTILO VISUAL EXECUTIVO COMPACTO E BLINDADO ---
 st.markdown(
     """
     <style>
@@ -102,14 +102,11 @@ st.markdown(
 )
 
 
-# Conexão direta pelo ID da planilha (mesmo padrão seguro do app.py)
+# Conexão direta usando o ID da planilha (sem URLs para não quebrar)
 @st.cache_resource
 def conectar_planilha():
-    base_url = "https://googleapis.com" + "/auth/"
-    escopos = [base_url + "spreadsheets", base_url + "drive"]
     credenciais_dict = dict(st.secrets["connections"]["gsheets"])
-    creds = Credentials.from_service_account_info(credenciais_dict, scopes=escopos)
-    cliente = gspread.authorize(creds)
+    cliente = gspread.service_account_from_dict(credenciais_dict)
     planilha = cliente.open_by_key("1I3V8UxkeQyP1tO7TZIVbQk7HQrxv-FSsz5l3ChCMsV4")
     return planilha.sheet1
 
@@ -160,7 +157,7 @@ def painel_ao_vivo():
 
     # Filtro rápido de data
     hoje_str = datetime.now(fuso_br).strftime("%d/%m/%Y")
-    col_filtro1, col_filtro2 = st.columns([1.5, 2.5])
+    col_filtro1, col_filtro2 = st.columns([1, 3])
     with col_filtro1:
         apenas_hoje = st.toggle("📅 Filtrar apenas entregas de HOJE", value=False)
 
