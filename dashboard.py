@@ -1,10 +1,11 @@
 
 from datetime import datetime
 from zoneinfo import ZoneInfo
+import gspread
+from google.oauth2.service_account import Credentials
 import pandas as pd
 import plotly.express as px
 import streamlit as st
-from streamlit_gsheets import GSheetsConnection
 
 st.set_page_config(
     page_title="Morelate - Torre de Controle", page_icon="📊", layout="wide"
@@ -34,17 +35,15 @@ if not st.session_state.autenticado:
                 st.error("❌ Senha incorreta.")
     st.stop()
 
-# --- ESTILO VISUAL EXECUTIVO BLINDADO (CONTRASTE PERFEITO) ---
+# --- ESTILO VISUAL EXECUTIVO BLINDADO ---
 st.markdown(
     """
     <style>
-    /* Reduz margens externas para aproveitar melhor a tela */
     .block-container {
         padding-top: 1.2rem !important;
         padding-bottom: 1.2rem !important;
         max-width: 96%;
     }
-    /* Banner superior verde Morelate */
     .top-banner {
         background-color: #0B6E31;
         padding: 12px 20px;
@@ -75,12 +74,10 @@ st.markdown(
         font-size: 0.82rem;
         font-weight: 600;
     }
-    /* Ajuste dos subtítulos das seções */
     h3 {
         font-size: 1.1rem !important;
         margin-bottom: 0.5rem !important;
     }
-    /* Cartões de KPIs com fundo e texto travados para nunca embaralhar */
     [data-testid="stMetric"] {
         background-color: #FFFFFF !important;
         border: 1px solid #D1D5DB !important;
@@ -104,17 +101,25 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Link completo da planilha montado de forma segura
-ID_PLANILHA = "1I3V8UxkeQyP1tO7TZIVbQk7HQrxv-FSsz5l3ChCMsV4"
-LINK_PLANILHA = f"https://google.com{ID_PLANILHA}/edit?gid=0#gid=0"
 
-conn = st.connection("gsheets", type=GSheetsConnection)
+# Conexão direta pelo ID da planilha (mesmo padrão seguro do app.py)
+@st.cache_resource
+def conectar_planilha():
+    base_url = "https://googleapis.com" + "/auth/"
+    escopos = [base_url + "spreadsheets", base_url + "drive"]
+    credenciais_dict = dict(st.secrets["connections"]["gsheets"])
+    creds = Credentials.from_service_account_info(credenciais_dict, scopes=escopos)
+    cliente = gspread.authorize(creds)
+    planilha = cliente.open_by_key("1I3V8UxkeQyP1tO7TZIVbQk7HQrxv-FSsz5l3ChCMsV4")
+    return planilha.sheet1
 
 
 # Atualização automática a cada 30 segundos
 @st.fragment(run_every=30)
 def painel_ao_vivo():
-    df = conn.read(spreadsheet=LINK_PLANILHA, ttl=0)
+    aba = conectar_planilha()
+    dados = aba.get_all_records()
+    df = pd.DataFrame(dados)
 
     fuso_br = ZoneInfo("America/Sao_Paulo")
     agora = datetime.now(fuso_br).strftime("%d/%m/%Y %H:%M:%S")
@@ -155,7 +160,7 @@ def painel_ao_vivo():
 
     # Filtro rápido de data
     hoje_str = datetime.now(fuso_br).strftime("%d/%m/%Y")
-    col_filtro1, col_filtro2 = st.columns([1, 3])
+    col_filtro1, col_filtro2 = st.columns([1.5, 2.5])
     with col_filtro1:
         apenas_hoje = st.toggle("📅 Filtrar apenas entregas de HOJE", value=False)
 
