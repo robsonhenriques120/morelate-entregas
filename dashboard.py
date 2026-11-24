@@ -2,7 +2,6 @@
 from datetime import datetime
 from zoneinfo import ZoneInfo
 import gspread
-from google.oauth2.service_account import Credentials
 import pandas as pd
 import plotly.express as px
 import streamlit as st
@@ -19,7 +18,7 @@ if not st.session_state.autenticado:
     col1, col2, col3 = st.columns([1, 1.5, 1])
     with col2:
         st.markdown(
-            "<h3 style='text-align: center; color: #0B6E31;'>🔒 Torre de Controle Morelate</h3>",
+            "<h2 style='text-align: center; color: #0B6E31;'>🔒 Torre de Controle Morelate</h2>",
             unsafe_allow_html=True,
         )
         st.info(
@@ -35,66 +34,19 @@ if not st.session_state.autenticado:
                 st.error("❌ Senha incorreta.")
     st.stop()
 
-# --- ESTILO VISUAL EXECUTIVO COMPACTO E BLINDADO ---
+# --- ESTILO VISUAL EXECUTIVO ORIGINAL ---
 st.markdown(
     """
     <style>
-    .block-container {
-        padding-top: 1.2rem !important;
-        padding-bottom: 1.2rem !important;
-        max-width: 96%;
-    }
     .top-banner {
         background-color: #0B6E31;
-        padding: 12px 20px;
-        border-radius: 10px;
-        color: #FFFFFF !important;
+        padding: 16px 24px;
+        border-radius: 12px;
+        color: white;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 14px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.08);
-    }
-    .top-banner h2 {
-        font-size: 1.35rem !important;
-        color: #FFFFFF !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-    .top-banner p {
-        font-size: 0.85rem !important;
-        margin: 2px 0 0 0 !important;
-        color: #D9F2E2 !important;
-    }
-    .badge-ao-vivo {
-        background-color: #085224;
-        color: #FFFFFF !important;
-        padding: 6px 12px;
-        border-radius: 6px;
-        font-size: 0.82rem;
-        font-weight: 600;
-    }
-    h3 {
-        font-size: 1.1rem !important;
-        margin-bottom: 0.5rem !important;
-    }
-    [data-testid="stMetric"] {
-        background-color: #FFFFFF !important;
-        border: 1px solid #D1D5DB !important;
-        border-left: 5px solid #0B6E31 !important;
-        padding: 10px 14px !important;
-        border-radius: 8px !important;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
-    }
-    [data-testid="stMetricLabel"] p {
-        font-size: 0.85rem !important;
-        color: #4B5563 !important;
-        font-weight: 600 !important;
-    }
-    [data-testid="stMetricValue"] div {
-        font-size: 1.65rem !important;
-        color: #111827 !important;
-        font-weight: 700 !important;
+        margin-bottom: 20px;
     }
     </style>
     """,
@@ -102,7 +54,7 @@ st.markdown(
 )
 
 
-# Conexão direta usando o ID da planilha (sem URLs para não quebrar)
+# Conexão direta usando o ID da planilha
 @st.cache_resource
 def conectar_planilha():
     credenciais_dict = dict(st.secrets["connections"]["gsheets"])
@@ -125,11 +77,11 @@ def painel_ao_vivo():
         f"""
         <div class="top-banner">
             <div>
-                <h2>🚛 Torre de Controle - Entregas Morelate</h2>
-                <p>Monitoramento em tempo real da operação</p>
+                <h2 style="margin:0; color:white;">🚛 Torre de Controle - Entregas Morelate</h2>
+                <p style="margin:0; color:#D9F2E2;">Monitoramento em tempo real da operação</p>
             </div>
-            <div>
-                <span class="badge-ao-vivo">
+            <div style="text-align:right;">
+                <span style="background:#085224; padding:8px 14px; border-radius:8px; font-weight:bold; color:white;">
                     🟢 AO VIVO • Atualizado às {agora}
                 </span>
             </div>
@@ -142,7 +94,7 @@ def painel_ao_vivo():
         st.warning("Aguardando os primeiros registros na planilha...")
         return
 
-    # Limpeza e formatação dos dados
+    # Limpeza dos dados
     df["Nota_Fiscal"] = (
         df["Nota_Fiscal"]
         .fillna("")
@@ -179,7 +131,7 @@ def painel_ao_vivo():
     c3.metric("🔴 Cancelados / Recusados", recusados)
     c4.metric("🎯 Taxa de Sucesso", f"{taxa_sucesso:.1f}%")
 
-    st.write("")
+    st.divider()
 
     # Gráficos Lado a Lado
     g1, g2 = st.columns(2)
@@ -206,9 +158,8 @@ def painel_ao_vivo():
                 yaxis={"categoryorder": "total ascending"},
                 xaxis_title="",
                 yaxis_title="",
-                font=dict(size=12),
-                height=290,
-                margin=dict(l=0, r=20, t=10, b=10),
+                height=360,
+                margin=dict(l=0, r=20, t=10, b=0),
             )
             st.plotly_chart(fig_motivos, use_container_width=True)
         else:
@@ -238,9 +189,8 @@ def painel_ao_vivo():
             xaxis_title="",
             yaxis_title="",
             legend_title="",
-            font=dict(size=12),
-            height=290,
-            margin=dict(l=0, r=0, t=10, b=10),
+            height=360,
+            margin=dict(l=0, r=0, t=10, b=0),
         )
         st.plotly_chart(fig_mot, use_container_width=True)
 
