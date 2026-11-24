@@ -77,9 +77,10 @@ st.markdown("""
 # Link direto da Planilha Google Morelate
 LINK_PLANILHA = "https://docs.google.com/spreadsheets/d/1I3V8UxkeQyP1tO7TZIVbQk7HQrxv-FSsz5l3ChCMsV4/edit?gid=0#gid=0"
 
+# Conecta com o Google Sheets (sem ler os dados ainda, para o celular abrir rápido)
 conn = st.connection("gsheets", type=GSheetsConnection)
-df_existente = conn.read(spreadsheet=LINK_PLANILHA, ttl=0)
 
+# Campos do formulário do motorista
 numero_nf = st.text_input("📋 Número da Nota Fiscal:", placeholder="Digite apenas números (Ex: 105432)")
 
 tipo_motorista = st.radio(
@@ -140,20 +141,32 @@ st.write("")
 if st.button("✅ Confirmar Registro", use_container_width=True):
     nf_limpa = numero_nf.strip()
     
+    # 1. Valida se o número da NF contém apenas dígitos
     if not nf_limpa or not nf_limpa.isdigit():
         st.error("❌ Digite apenas números válidos para a Nota Fiscal.")
+        
+    # 2. Valida se o motorista e o motivo (se recusado) foram selecionados
     elif motorista == "Selecione..." or (status == "🔴 Cancelado / Recusado" and motivo_selecionado == "Selecione..."):
         st.error("❌ Preencha o Entregador e o Motivo do cancelamento.")
-    else:
-        notas_registradas = (
-            df_existente["Nota_Fiscal"]
-            .dropna()
-            .astype(str)
-            .str.replace(r"\.0$", "", regex=True)
-            .str.strip()
-            .values
-        )
         
+    else:
+        # 3. Lê a planilha exatamente agora para evitar sobrescrever dados de outro motorista
+        df_atualizado = conn.read(spreadsheet=LINK_PLANILHA, ttl=0)
+        
+        # 4. Verifica notas já registradas (com proteção caso a planilha esteja vazia)
+        if not df_atualizado.empty and "Nota_Fiscal" in df_atualizado.columns:
+            notas_registradas = (
+                df_atualizado["Nota_Fiscal"]
+                .dropna()
+                .astype(str)
+                .str.replace(r"\.0$", "", regex=True)
+                .str.strip()
+                .values
+            )
+        else:
+            notas_registradas = []
+        
+        # 5. Impede duplicidade ou salva o novo registro
         if nf_limpa in notas_registradas:
             st.warning(f"⚠️ Atenção: A Nota Fiscal {nf_limpa} já foi registrada anteriormente!")
         else:
@@ -169,15 +182,17 @@ if st.button("✅ Confirmar Registro", use_container_width=True):
                 "Observações": observacao.strip()
             }])
             
-            df_final = pd.concat([df_existente, df_novo], ignore_index=True)
+            df_final = pd.concat([df_atualizado, df_novo], ignore_index=True)
             conn.update(spreadsheet=LINK_PLANILHA, data=df_final)
             
             st.success(f"✅ Nota Fiscal {nf_limpa} registrada com sucesso às {agora}!")
 
+# Área restrita na barra lateral
 st.sidebar.header("🔒 Área da Logística")
 senha = st.sidebar.text_input("Senha de acesso:", type="password")
 
 if senha == "morelate2026":
     st.divider()
     st.subheader("📊 Últimos Registros na Planilha Google")
-    st.dataframe(df_existente.tail(10), use_container_width=True)
+    df_logistica = conn.read(spreadsheet=LINK_PLANILHA, ttl=0)
+    st.dataframe(df_logistica.tail(10), use_container_width=True)
